@@ -1,0 +1,4 @@
+exports.MULTICAST_ADDRESS = "239.255.42.24";
+
+exports.PORT_MUSICIANS = 2222;
+exports.PORT = 2205;
