@@ -34,6 +34,7 @@ if(INSTRUMENTS[arg] === undefined){
 function Musician() {
 	this.uuid = uuid.v4(),
 	this.instrument = arg,
+	this.sound = INSTRUMENTS[arg],
 	this.activeSince = new Date()
 }
 
@@ -42,12 +43,13 @@ Musician.prototype.update = function() {
 	var musicianToJson =  {
 	'uuid':this.uuid,
 	'instrument':this.instrument,
-	'sound':INSTRUMENTS[this.instrument],
+	'sound':INSTRUMENTS[this.intrument],
 	'activeSince':this.activeSince
 	};
 
 	var json = JSON.stringify(musicianToJson);
-	socket.send(json, protocol.PORT, protocol.MULTICAST_ADDRESS, function() {
+	var toSend = new Buffer(json);
+	socket.send(toSend, 0, toSend.length, protocol.PORT, protocol.MULTICAST_ADDRESS, function() {
 		console.log('Sending ' + json);
 	});
 }

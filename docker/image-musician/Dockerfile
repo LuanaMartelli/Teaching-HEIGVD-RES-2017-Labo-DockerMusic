@@ -12,6 +12,8 @@ COPY src /opt/app/
 
 RUN cd /opt/app
 
+EXPOSE 2205
+
 ENTRYPOINT ["node", "/opt/app/musician.js"]
 
 
