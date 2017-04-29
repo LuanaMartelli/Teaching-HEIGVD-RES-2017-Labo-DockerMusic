@@ -4,6 +4,15 @@ var protocol = require('./protocol');
 /* Constants */
 const INTERVAL = 5000;
 
+/* All the sounds */
+const SOUNDS = {
+    'ti-ta-ti':'piano',
+    'pouet':'trumpet',
+    'trulu':'flute',
+    'gzi-gzi':'violin',
+    'boum-boum':'drum'
+};
+
 /* Variable for the connexion */
 var dgram = require('dgram');
 var net = require('net');
@@ -14,42 +23,42 @@ socket.bind(protocol.PORT, function() {
     socket.addMembership(protocol.MULTICAST_ADDRESS);
 });
 
-var allMusicians = new Map();
-var lastActivity = new Map();
+var currentlyPlaying = new Map();
 
 socket.on('message', function(msg, src) {
     console.log("Message " + msg + " from port " + src.port)
+
     var data = JSON.parse(msg);
-    
-    lastActivity.set(data.uuid, new Date());
+    var soundAlreadyExists = false;
 
-if(!allMusicians.has(data.uuid)) {
-    console.log("A new musician arrived ! Uuid : " + data.uuid);
-    allMusicians.set(data.uuid, {
-        'uuid':data.uuid,
-        'instrument':data.instrument,
-        'activeSince':new Date()
-    });
-} else {
-    allMusicians.get(data.uuid).activeSince = new Date();
-}  
-
+    // we check every sound playing to update the array
+    if (!currentlyPlaying.has(data.uuid)) {
+            currentlyPlaying.set(data.uuid, {
+                'uuid':data.uuid,
+                'instrument':data.instrument,
+                'activeSince':data.activeSince
+            });
+    console.log("New sound recieved : " + SOUNDS[data.INSTRUMENTS[data.instrument]]);
+    } else {
+        currentlyPlaying.get(data.uuid).activeSince = new Date();
+    }    
 });
 
 var server = net.createServer(function (s) {
 
     var now = new Date();
     musicians = [];
-    allMusicians.forEach(function (valeur, clef){
+    currentlyPlaying.forEach(function (valeur, clef){
     if(now - valeur.activeSince <= INTERVAL){
         musicians.push(valeur);
     }
    var newLine = JSON.stringify(musicians);
     s.write(newLine + '\n');
     s.end();
-});
+    });
 
 });
 
 
 server.listen(protocol.PORT);
+

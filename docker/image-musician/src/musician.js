@@ -23,8 +23,8 @@ var dgram = require('dgram');
 var socket = dgram.createSocket('udp4');;
 
 /* Get the instrument from the command's line */
-var instrument = process.argv[ARGUMENT];
-if(INSTRUMENTS[instrument] === undefined){
+var arg = process.argv[ARGUMENT];
+if(INSTRUMENTS[arg] === undefined){
 	process.on('exit', function(){
 		console.log('Seems like the instrument is unknow... Quitting the application...');
 		process.exit(1);
@@ -33,7 +33,7 @@ if(INSTRUMENTS[instrument] === undefined){
 
 function Musician() {
 	this.uuid = uuid.v4(),
-	this.instru = instrument,
+	this.instrument = arg,
 	this.activeSince = new Date()
 }
 
@@ -41,7 +41,8 @@ function Musician() {
 Musician.prototype.update = function() {
 	var musicianToJson =  {
 	'uuid':this.uuid,
-	'sound':INSTRUMENTS[this.instru],
+	'instrument':this.instrument,
+	'sound':INSTRUMENTS[this.instrument],
 	'activeSince':this.activeSince
 	};
 
