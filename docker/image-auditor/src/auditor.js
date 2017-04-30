@@ -1,55 +1,70 @@
-/*  Get in a variable the protocol's info */ 
 var protocol = require('./protocol');
 
-/* Constants */
-const INTERVAL = 5000;
+
+var sounds = new Map();
+sounds.set("ti-ta-ti", "piano");
+sounds.set("pouet", "trumpet");
+sounds.set("trulu", "flute");
+sounds.set("gzi-gzi", "violin");
+sounds.set("boum-boum", "drum");
+
+var maxWaitSeconds = 5;
 
 
-/* Variable for the connexion */
 var dgram = require('dgram');
-var net = require('net');
-var socket = dgram.createSocket('udp4');
 
+
+var net = require('net');
+
+
+/*
+ * Let's create a datagram socket. We will use it to listen for datagrams published in the
+ * multicast group by musicians and containing sounds
+ */
+var socket = dgram.createSocket('udp4');
 socket.bind(protocol.PORT_MUSICIANS, function() {
     console.log("An auditor has joined the concerto !");
     socket.addMembership(protocol.MULTICAST_ADDRESS);
 });
 
-var currentlyPlaying = new Map();
+var alwaysthere = [];
+var soundsPlaying = [];
+var musicians = new Map();
 
-socket.on('message', function(msg, src) {
-    console.log("Message " + msg + " from port " + src.port)
 
+socket.on('message', function(msg, source) {
+    console.log("An auditor has joined the concerto !");
     var data = JSON.parse(msg);
+    var soundAlreadyExists = false;
 
-    // we check every sound playing to update the array
-    if (!currentlyPlaying.has(data.uuid)) {
-            currentlyPlaying.set(data.uuid, {
-                'uuid':data.uuid,
-                'instrument':data.instrument,
-                'activeSince':data.activeSince
-            });
-    console.log("New sound recieved : " + data.sound);
+    if (!musicians.has(data.uuid)) {
+        musicians.set(data.uuid, {
+            'uuid' : data.uuid,
+            'instrument' : data.instrument,
+            'activeSince' : new Date()
+        });
     } else {
-        currentlyPlaying.get(data.uuid).activeSince = new Date();
-    }    
+        musicians.get(data.uuid).activeSince = new Date();
+    }
+
 });
 
-var server = net.createServer(function (s) {
+var server = net.createServer(function (s) {   
+    console.log("Server from auditor");
 
     var now = new Date();
-    musicians = [];
-    currentlyPlaying.forEach(function (valeur, clef){
-    if(now - valeur.activeSince <= INTERVAL){
-        musicians.push(valeur);
-    }
-   var newLine = JSON.stringify(musicians);
-    s.write(newLine + '\n');
+    alwaysthere = [];
+    musicians.forEach(function (v, k) {
+        if (now - v.activeSince <= 5000) {
+            alwaysthere.push(v);
+        }
+    })
+
+    var toSend = JSON.stringify(alwaysthere);
+    s.write(toSend);
     s.end();
-    });
+
 
 });
 
-
 server.listen(protocol.PORT, '0.0.0.0');
-

@@ -1,2 +1,2 @@
-exports.PORT = 2222;
-exports.MULTICAST_ADDRESS = "239.255.56.42";
+exports.PORT_MUSICIANS = 2222;
+exports.MULTICAST_ADDRESS = "239.255.36.36";

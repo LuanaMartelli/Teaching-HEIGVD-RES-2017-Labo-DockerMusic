@@ -10,7 +10,9 @@ MAINTAINER LuanaMartelli <luana.martelli@heig-vd.ch>
 
 COPY src /opt/app/
 
-RUN cd /opt/app
+WORKDIR /opt/app/
+
+RUN npm install
 
 EXPOSE 2205
 
